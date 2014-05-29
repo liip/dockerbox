@@ -6,8 +6,8 @@ VAGRANTFILE_API_VERSION = "2"
 
 # the ip address where the vm can be accessed from the host
 vm_ip                   = "172.84.98.33"
-host_name               = "migrosapi.lo"
-host_aliases            =  %w(www.migrosapi.lo)
+host_name               = "dockerbox.lo"
+host_aliases            =  %w(www.dockerbox.lo)
 vagrant_config_folder   = "/vagrant"
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
@@ -48,6 +48,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # argument is a set of non-required options.
   # config.vm.synced_folder "../data", "/vagrant_data"
   config.vm.synced_folder "..", "/opt/docker-git", :nfs => true
+  config.vm.hostname = host_name
 
   # Provider-specific configuration so you can fine-tune various
   # backing providers for Vagrant. These expose provider-specific options.
@@ -132,16 +133,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # chef-validator, unless you changed the configuration.
   #
   #   chef.validation_client_name = "ORGNAME-validator"
-
-  if Dir.glob("#{File.dirname(__FILE__)}/.vagrant/machines/default/*/id").empty?
-    # Install Docker
-    pkg_cmd = "wget -q -O - https://get.docker.io/gpg | apt-key add -;" \
-      "echo deb http://get.docker.io/ubuntu docker main > /etc/apt/sources.list.d/docker.list;" \
-      "apt-get update -qq; apt-get install -q -y --force-yes lxc-docker; "
-    # Add vagrant user to the docker group
-    pkg_cmd << "usermod -a -G docker vagrant; "
-    config.vm.provision :shell, :inline => pkg_cmd
-  end
 
   config.vm.provision :chef_solo do |chef|
 
