@@ -1,0 +1,3 @@
+Vagrant.configure("2") do |config|
+   config.vm.synced_folder "/opt/docker-git", "/opt/docker-git", :nfs => true
+end
