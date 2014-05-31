@@ -28,13 +28,18 @@ cachedid_error=0
 if [[ -e "/tmp/dockerboxid" ]]; then
    ID=$(cat /tmp/dockerboxid | cut -f 1 -d ":");
    PORT=$(cat /tmp/dockerboxid | cut -f 2 -d ":");
-   if [ -z "$command" ]; then
-      ssh -q -p $PORT -i  ~/.vagrant.d/insecure_private_key -o "StrictHostKeyChecking no" -o "UserKnownHostsFile /dev/null" -t vagrant@127.0.0.1 "if [[ -d $(pwd) ]]; then cd $(pwd); fi; bash"
+   if [ ! -z "$ID" -a ! -z "$PORT" ]; then
+       if [ -z "$command" ]; then
+          ssh -q -p $PORT -i  ~/.vagrant.d/insecure_private_key -o "StrictHostKeyChecking no" -o "UserKnownHostsFile /dev/null" -t vagrant@127.0.0.1 "if [[ -d $(pwd) ]]; then cd $(pwd); fi; bash"
+       else
+          ssh -q -p $PORT -i  ~/.vagrant.d/insecure_private_key -o "StrictHostKeyChecking no" -o "UserKnownHostsFile /dev/null" -t vagrant@127.0.0.1 "if [[ -d $(pwd) ]]; then cd $(pwd); fi; $command"
+       fi
+       if [[ ! $? -eq 0 ]]; then
+           cachedid_error=1
+       fi
    else
-      ssh -q -p $PORT -i  ~/.vagrant.d/insecure_private_key -o "StrictHostKeyChecking no" -o "UserKnownHostsFile /dev/null" -t vagrant@127.0.0.1 "if [[ -d $(pwd) ]]; then cd $(pwd); fi; $command"
-   fi
-   if [[ ! $? -eq 0 ]]; then
-       cachedid_error=1
+       ID=""
+       PORT=""
    fi
 fi
 
