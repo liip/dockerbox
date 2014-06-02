@@ -63,12 +63,8 @@ if [ -z "$ID" -o $cachedid_error -eq 1 ]; then
    fi
    STATUS=$(echo $BOXINFO | awk '{print $4}')
    NEWID=$(echo $BOXINFO | awk '{print $1}')
-   if [ "$NEWID" != "$ID" -o ! $STATUS == "running"  ]; then
+   if [ "$NEWID" != "$ID" -o ! $STATUS == "running" -o $cachedid_error -eq 1 ]; then
        ID=$NEWID
-       if [[ ! $STATUS == "running" ]]; then
-            echo "dockerbox not running. Starting"
-            vagrant up $ID
-       fi
        PORT=$(vagrant ssh-config $ID | grep Port | awk '{print $2}')
        if [ -z "$PORT" ]; then
             echo "No ssh port found, maybe dockerbox is not running, try starting it"
