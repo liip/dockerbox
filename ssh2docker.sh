@@ -53,6 +53,14 @@ fi
 if [ -z "$ID" -o $cachedid_error -eq 1 ]; then
    #echo "ID not cached or wrong, try to find out"
    BOXINFO=$(vagrant global-status | grep dockerbox)
+   if [ -z "$BOXINFO" ]; then
+       echo "*******"
+       echo "dockerbox not found in 'vagrant global-status'"
+       echo "*******"
+       echo " Please start it manually with 'vagrant up' in the"
+       echo " dockerbox directory"
+       exit 2
+   fi
    STATUS=$(echo $BOXINFO | awk '{print $4}')
    NEWID=$(echo $BOXINFO | awk '{print $1}')
    if [ "$NEWID" != "$ID" -o ! $STATUS == "running"  ]; then
@@ -62,6 +70,19 @@ if [ -z "$ID" -o $cachedid_error -eq 1 ]; then
             vagrant up $ID
        fi
        PORT=$(vagrant ssh-config $ID | grep Port | awk '{print $2}')
+       if [ -z "$PORT" ]; then
+            echo "No ssh port found, maybe dockerbox is not running, try starting it"
+            vagrant up $ID
+            if [[ $? -eq 0 ]]; then
+               echo "Vagrant box up, restarting script"
+               $0 $command
+               exit 0
+            else
+               echo "ERROR: Something went wrong, try (re)starting the dockerbox by hand"
+               echo " with vagrant up"
+               exit 1
+            fi
+       fi
        echo "New dockerbox id, write it and login"
        echo -n "$ID:$PORT" > /tmp/dockerboxid
        ssh_to_box $command
